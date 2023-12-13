@@ -1,0 +1,67 @@
+﻿@model ML.Carrito
+
+@{
+}
+
+<h1 class="text-center">Carrito</h1>
+
+@if (Model.CarritoProductos != null && Model.CarritoProductos.Count > 0)
+{
+    <div class="btn-group d-flex" role="group" aria-label="Button group with nested dropdown">
+        <button type="button" onclick="AbrirModal()" class="btn btn-dark"><i class="fa-solid fa-money-bill"></i> Comprar</button>
+    </div>
+    <br />
+    <table class="table table-dark table-bordered table-responsive">
+        <thead>
+            <tr class="table-secondary">
+                <td class="text-center">Nombre</td>
+                <td class="text-center">Precio</td>
+                <td class="text-center">Imagen</td>
+                <td class="text-center">Agregar</td>
+                <td class="text-center">Cantidad</td>
+                <td class="text-center">Sub Total</td>
+                <td class="text-center">Quitar</td>
+                <td class="text-center">Eliminar</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (ML.Producto producto in Model.CarritoProductos)
+            {
+                <tr class="text-center align-middle">
+                    <td>@producto.Nombre</td>
+                    <td>$ @producto.Precio</td>
+                    @if (producto.Foto != null)
+                    {
+                        <td class="text-center"><img id="Img" src="data:image/*;base64,@producto.Foto" style="width:80px ; " /></td>
+                    }
+                    else
+                    {
+                        <td class="text-center"><img id="Img" src="https://st.depositphotos.com/2934765/53192/v/450/depositphotos_531920820-stock-illustration-photo-available-vector-icon-default.jpg" style="width:50px;" /></td>
+                    }
+
+                    <td><a class="btn btn-success" href="@Url.Action("Add","Carrito", new {idProducto = producto.Id, bandera="agregar"})"><i class="fa-solid fa-square-plus"></i></a> </td>
+                    <td>@producto.Cantidad </td>
+                    <td>$@producto.SubTotal </td>
+                    <td><a class="btn btn-warning" href="@Url.Action("Quitar","Carrito", new {idProducto = producto.Id, bandera="quitar"})"><i class="fa-solid fa-square-minus"></i></a> </td>
+                    <td><a class="btn btn-danger" href="@Url.Action("Quitar","Carrito", new {idProducto = producto.Id, bandera="eliminar"})"><i class="fa-solid fa-trash-can"></i></a> </td>
+                </tr>
+            }
+            <tr class="table-borderless table-light">
+                <td colspan="5"></td>
+                <td class="text-center" style="background-color: #00CF13; color: #fff; font-weight: bold;">Total: $ @Model.Total</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <div class="text-center">
+        <a type="button" class="btn btn-danger" href="@Url.Action("Vaciar", "Carrito")">Borrar todo del carrito</a>
+    </div>
+
+} else
+{
+    <div class="alert alert-danger" role="alert">
+        <p class="fs-3 fw-bold text-center"><u>No hay nada en el carrito!</u></p>
+    </div>
+
+}

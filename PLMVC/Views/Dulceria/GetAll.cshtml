@@ -1,0 +1,26 @@
+﻿@model ML.Producto
+@{
+}
+<h1>Dulceria</h1>
+<br />
+
+@if (Model.Productos != null && Model.Productos.Count > 0)
+{
+    <div class="d-flex justify-content-center flex-wrap">
+        @foreach(ML.Producto producto in Model.Productos)
+        {
+
+        <div class="card text-center m-2" style="width: 18rem;">
+            <h5 class="card-title p-2">@producto.Nombre</h5>
+                <img src="data:image/*;base64,@producto.Foto" class="card-img-top mx-auto d-block" alt="Imagen del producto" style="width: 40%;">
+            <div class="card-body">
+                <p class="card-text">Precio: $@producto.Precio</p>
+                <br>
+                    <a href="@Url.Action("Add","Carrito", new {idProducto = producto.Id, bandera = "nuevo"})" class="btn btn-primary mx-auto d-block">Agregar al carrito</a>
+            </div>
+        </div>
+
+        }
+    </div>
+}
+

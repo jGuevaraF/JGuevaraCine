@@ -1,0 +1,193 @@
+﻿@model ML.Cine
+
+@{
+    // Layout = null;
+}
+<style>
+    .contenedor {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .columna {
+        width: 45%;
+        height: 370px;
+        padding: 15px;
+        border: 5px solid black;
+    }
+
+    #grafica, #map {
+        width: 100%;
+        background-color: white;
+    }
+
+    #map{
+        height: 80%;
+    }
+
+    #grafica{
+        height: 100%;
+    }
+
+    h1 {
+        text-align: center;
+    }
+</style>
+
+<script>
+    window.onload = function () {
+
+        var zonas = @Html.Raw(Json.Serialize(Model.Zona?.Zonas)); //obtengo un array de objetos
+        var cines = @Html.Raw(Json.Serialize(Model.Cines));
+        var zonaEncontrada = [], sumaVentasPorZona = [];
+        var porcentaje = 0;
+
+        for (let i = 0; i < zonas.length; i++) { //obtengo el nombre de todas las zonas registradas
+            zonaEncontrada.push(zonas[i].zonaNombre);
+        }
+
+        for (let i = 0; i < zonaEncontrada.length; i++) { //selecciono una zona y la voy comparando con la lista de cines 
+            var zona = zonaEncontrada[i];
+
+            for (let j = 0; j < cines.length; j++) {
+                var cine = cines[0]; //siempre voy a iterar el primer elemento del arreglo
+                var nombreZona = cine.zona.zonaNombre;
+                var venta = cine.ventas;
+
+                var entradaExistente = sumaVentasPorZona.find(function (entrada) { //el find tomara el elemento (entrada) de mi arreglo sumaVentasPorZona, y lo iterara por completo, validando si encuentra el nombre de la zona en el arreglo
+                    return entrada.nombreZona === nombreZona;
+                });
+
+                if (entradaExistente) { //como coincidio, puedo validar con la variable entradaExistente y acceder a las propiedades de mi objeto
+                    entradaExistente.ventas += venta;
+                } else {
+                    sumaVentasPorZona.push({ nombreZona: nombreZona, ventas: venta });
+                }
+
+                cines.splice(0, 1); //elimino la posicion del arreglo que acabo de iterar, para evitar que cuando pase a otra zona, vuelva a validar los cines que ya fueron agregados a sumaVentasPorZona
+
+                porcentaje += venta;
+            }
+        }
+
+        var dataPoints = [];
+        
+
+        for (var i = 0; i < sumaVentasPorZona.length; i++) { //como en la grafica para mostrar los valores necesita un arreglo de objetos con las propiedades y y label, creamos el arreglo de objetos con los valores obtenidos en sumaVentasPorZona
+            var resultado = sumaVentasPorZona[i];
+            resultado.ventas = (resultado.ventas * 100) / porcentaje;
+            dataPoints.push({
+                y: resultado.ventas, 
+                label: resultado.nombreZona 
+            });
+        }
+      
+        
+        var options = {
+            title: {
+                text: "Cines"
+            },
+            subtitles: [{
+                text: "Ventas por Zona"
+            }],
+            animationEnabled: true,
+            data: [{
+                type: "pie",
+                startAngle: 40,
+                toolTipContent: "<b>{label}</b>: {y}%",
+                showInLegend: "true",
+                legendText: "{label}",
+                indexLabelFontSize: 16,
+                indexLabel: "{label} - {y}%",
+                dataPoints: dataPoints
+            }]
+        };
+        $("#grafica").CanvasJSChart(options);
+
+    }
+</script>
+
+
+<div class="contenedor">
+    <div class="columna">
+        <div id="grafica"></div>
+    </div>
+    <div class="columna">
+        <h1>Puntos de venta</h1>
+        <div id="map">
+            
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+<script src="https://cdn.canvasjs.com/jquery.canvasjs.min.js"></script>
+
+<script>
+
+        (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })({
+            key: "AIzaSyCSKBDdPPlfca_zTwyxKiicRQn1qfgRjLw",
+            // Add other bootstrap parameters as needed, using camel case.
+            // Use the 'v' parameter to indicate the version to load (alpha, beta, weekly, etc.)
+        });
+
+    // Initialize and add the map
+    var map, marker;
+    var latitud = 19.430570307662446, longitud = -99.16166352568936;
+    var positiion;
+
+    async function initMap() {
+        // The location of Uluru
+
+        const position = { lat: latitud, lng: longitud };
+        // Request needed libraries.
+        const { Map } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerView } = await google.maps.importLibrary("marker");
+
+        // The map, centered at Uluru
+        map = new Map(document.getElementById("map"), {
+            zoom: 13,
+            center: position,
+            mapId: "DEMO_MAP_ID",
+        });
+
+        var cines = @Html.Raw(Json.Serialize(Model.Cines)); // pasamos la lista a objetos en JS
+        //console.log(cines);
+
+        for (var i = 0; i < cines.length; i++) {
+            var cine = cines[i];
+            var marker = new google.maps.Marker({
+                position: new google.maps.LatLng(cine.latitud, cine.longitud),
+                map: map,
+                title: cine.cineNombre
+            });
+
+            //diseño a la card
+            var infoWindow = new google.maps.InfoWindow({
+                content: '<div style="font-size:16px;color:#333; width: 100%; max-width: 300px; max-height: 140px;">' +
+                    '<h2>' + cine.cineNombre + '</h2>' +
+                    '<p><strong>Ventas:</strong> ' + cine.ventas + '</p>' +
+                    '<p><strong>Dirección:</strong> ' + cine.direccion + '</p>' +
+                    '<p><strong>Zona:</strong> ' + cine.zona.zonaNombre + '</p>' +
+                    '</div>'
+            });
+
+            marker.addListener('click', (function (marker, infoWindow) {
+                return function () {
+                    infoWindow.open(map, marker);
+                };
+            })(marker, infoWindow));
+        }
+
+
+    }
+
+    initMap();
+
+
+</script>
+

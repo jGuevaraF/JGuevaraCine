@@ -1,0 +1,51 @@
+﻿@model ML.Cine
+@{
+}
+<h1 class="text-center">Cines</h1>
+<div class="d-flex justify-content-center m-3">
+    <a class="btn btn-success"href="@Url.Action("Form", "Cine")">Agregar Cine</a>
+</div>
+
+@if (Model.Cines != null && Model.Cines.Count > 0)
+{
+    <div class="container">
+        <table class="table table-bordered table-striped table-dark text-center">
+            <thead>
+                <tr class="text-center align-content-center">
+                    <th>Editar</th>
+                    <th>Nombre</th>
+                    <th>Ventas</th>
+                    <th>Direccion</th>
+                    <th>Zona</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (ML.Cine cine in Model.Cines)
+                {
+                    <tr class="text-center">
+                        <td>
+                            <a class="btn btn-outline-secondary m-1" href="@Url.Action("Form", "Cine", new {idCine = cine.IdCine, idZona = cine.Zona.IdZona})"><i class="fa-solid fa-pen-to-square fa-flip-horizontal fa-lg" style="color: #007bff;"></i></a>
+                        </td>
+                        <td>@cine.CineNombre</td>
+                        <td>@cine.Ventas</td>
+                        <td>@cine.Direccion</td>
+                        <td>@cine.Zona.ZonaNombre</td>
+                        <td>
+                            <a class="btn btn-outline-secondary m-1" href="@Url.Action("Delete", "Cine", new {idCine=cine.IdCine})"
+                               onclick="return confirm('¿Estás seguro de que deseas eliminar este Cine?')">
+                                <i class="fa-sharp fa-solid fa-trash fa-lg" style="color: #dc3545;"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+}
+else
+{
+    <p>No hay cines</p>
+}
